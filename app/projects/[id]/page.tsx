@@ -130,7 +130,6 @@ export default async function ProjectDetailPage({
                     <UrlDeleteButton
                       urlId={url.id}
                       urlAlias={url.alias || url.url}
-                      projectId={id}
                     />
                   </div>
                 </div>
