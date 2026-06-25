@@ -1,6 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['@libsql/client', 'lighthouse', 'chrome-launcher'],
+  output: 'standalone',
+  serverExternalPackages: [
+    '@libsql/client',
+    'lighthouse',
+    'chrome-launcher',
+    'chrome-remote-interface',
+  ],
 }
 
 module.exports = nextConfig

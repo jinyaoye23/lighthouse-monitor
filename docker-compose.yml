@@ -1,0 +1,21 @@
+services:
+  app:
+    build: .
+    container_name: lighthouse-monitor
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # 持久化 SQLite + 检测报告
+      - app_data:/app/data
+    # Chrome 需要更多内存（Lighthouse 检测时峰值 ~1GB）
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    environment:
+      - NODE_ENV=production
+      - TZ=Asia/Shanghai
+
+volumes:
+  app_data:
