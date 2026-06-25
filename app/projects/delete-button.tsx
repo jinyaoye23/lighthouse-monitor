@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { deleteProject } from '@/lib/actions/projects'
 
 export default function DeleteButton({
@@ -18,8 +19,15 @@ export default function DeleteButton({
 
   async function handleDelete() {
     setLoading(true)
-    await deleteProject(projectId)
-    router.refresh()
+    try {
+      await deleteProject(projectId)
+      toast.success(`项目「${projectName}」已删除`)
+      router.refresh()
+    } catch {
+      toast.error('删除失败，请重试')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (confirming) {

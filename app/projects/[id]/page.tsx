@@ -77,7 +77,7 @@ export default async function ProjectDetailPage({
               return (
                 <div
                   key={url.id}
-                  className="flex items-center gap-4 p-4 rounded-xl border border-border bg-white hover:shadow-sm transition-shadow group"
+                  className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border border-border bg-white hover:shadow-sm transition-shadow group"
                 >
                   {/* Device icon */}
                   <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
@@ -120,7 +120,7 @@ export default async function ProjectDetailPage({
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-1 flex-shrink-0 mt-2 sm:mt-0">
                     <Link
                       href={`/projects/${id}/urls/${url.id}`}
                       className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors"

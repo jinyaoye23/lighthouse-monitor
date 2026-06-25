@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, X } from 'lucide-react'
+import { toast } from 'sonner'
 import { createTargetUrl } from '@/lib/actions/urls'
 
 export default function UrlCreateForm({ projectId }: { projectId: string }) {
@@ -56,6 +57,7 @@ export default function UrlCreateForm({ projectId }: { projectId: string }) {
         device,
         categories,
       })
+      toast.success('URL 已添加')
       setOpen(false)
       setUrl('')
       setAlias('')

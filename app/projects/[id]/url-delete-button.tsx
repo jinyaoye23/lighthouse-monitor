@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { deleteTargetUrl } from '@/lib/actions/urls'
 
 export default function UrlDeleteButton({
@@ -20,8 +21,15 @@ export default function UrlDeleteButton({
 
   async function handleDelete() {
     setLoading(true)
-    await deleteTargetUrl(urlId)
-    router.refresh()
+    try {
+      await deleteTargetUrl(urlId)
+      toast.success(`URL「${urlAlias}」已删除`)
+      router.refresh()
+    } catch {
+      toast.error('删除失败，请重试')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (confirming) {

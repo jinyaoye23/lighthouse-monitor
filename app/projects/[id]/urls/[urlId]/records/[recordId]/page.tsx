@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { getAuditDetail, getScoreTrend } from '@/lib/actions/audits'
 import ScoreTrendChart from '@/components/ScoreTrendChart'
 import { cn, formatDate, formatMs, getScoreColor, getScoreBgColor, getScoreLabel, CATEGORY_LABELS, DEVICE_LABELS } from '@/lib/utils'
-import { ArrowLeft, Clock, AlertCircle, Download, BarChart3, Zap, Monitor, Smartphone, FileText, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Clock, AlertCircle, Download, BarChart3, Zap, Monitor, Smartphone, FileText, ExternalLink, FileJson } from 'lucide-react'
 import fs from 'fs'
 import { parseLhr } from '@/lib/lighthouse/parser'
 import type { ParsedReport } from '@/types'
@@ -95,6 +95,16 @@ export default async function AuditRecordDetailPage({
               <FileText size={14} />
               查看完整报告
               <ExternalLink size={12} />
+            </a>
+          )}
+          {detail.status === 'completed' && detail.reportPath && (
+            <a
+              href={`/api/report/${recordId}/json`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
+              download
+            >
+              <FileJson size={14} />
+              下载 JSON
             </a>
           )}
         </div>
