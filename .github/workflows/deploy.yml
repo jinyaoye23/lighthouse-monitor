@@ -1,4 +1,4 @@
-name: Deploy to Alibaba Cloud
+name: Deploy via Docker
 
 on:
   push:
@@ -6,43 +6,108 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    env:
+      IMAGE_NAME: lighthouse-monitor
+      CONTAINER_NAME: lighthouse-monitor
 
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t $IMAGE_NAME:${{ github.sha }} .
+
+      - name: Save Docker image
+        run: |
+          docker save $IMAGE_NAME:${{ github.sha }} -o image.tar
+          chmod 644 image.tar
+
+      - name: Prepare remote deploy directory
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          host: ${{ secrets.ALIYUN_HOST }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          key: ${{ secrets.ALIYUN_SSH_KEY }}
+          port: ${{ secrets.ALIYUN_PORT }}
+          script: |
+            mkdir -p /tmp/deploy-${{ github.sha }}
+
+      - name: Transfer Docker image
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.ALIYUN_HOST }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          key: ${{ secrets.ALIYUN_SSH_KEY }}
+          port: ${{ secrets.ALIYUN_PORT }}
+          timeout: 120s
+          source: "image.tar"
+          target: "/tmp/deploy-${{ github.sha }}"
+
+      - name: Load image and deploy container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ALIYUN_HOST }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          key: ${{ secrets.ALIYUN_SSH_KEY }}
+          port: ${{ secrets.ALIYUN_PORT }}
+          timeout: 120s
+          script_stop: true
           script: |
             set -e
+            echo "=== Starting container deployment ==="
 
-            REPO_URL="https://${{ secrets.GIT_TOKEN }}@github.com/jinyaoye23/lighthouse-monitor.git"
-            PROJECT_DIR=/opt/lighthouse-monitor
+            IMAGE_NAME=${{ env.IMAGE_NAME }}
+            CONTAINER_NAME=${{ env.CONTAINER_NAME }}
+            DEPLOY_DIR=/tmp/deploy-${{ github.sha }}
 
-            # 首次部署自动 clone，后续自动 pull
-            if [ ! -d "$PROJECT_DIR" ]; then
-              echo ">>> First deploy: cloning repo..."
-              mkdir -p /opt
-              git clone "$REPO_URL" "$PROJECT_DIR"
+            cd "$DEPLOY_DIR"
+
+            echo "Loading Docker image..."
+            sudo docker load -i image.tar
+
+            # 创建持久化 volume（首次运行）
+            sudo docker volume create lighthouse-monitor-data 2>/dev/null || true
+
+            echo "Removing existing container..."
+            sudo docker rm -f "$CONTAINER_NAME" || true
+
+            echo "Starting new container..."
+            sudo docker run -d \
+              --name "$CONTAINER_NAME" \
+              -p 3300:3300 \
+              -v lighthouse-monitor-data:/app/data \
+              --memory="2g" \
+              --restart unless-stopped \
+              -e TZ=Asia/Shanghai \
+              "$IMAGE_NAME:${{ github.sha }}"
+
+            echo "✅ Container started."
+
+            echo "=== Container status ==="
+            sudo docker ps --filter "name=$CONTAINER_NAME"
+
+            echo "Cleaning up deploy directory: $DEPLOY_DIR"
+            rm -rf "$DEPLOY_DIR"
+
+            echo "=== Deployment completed ==="
+
+      - name: Health check
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ALIYUN_HOST }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          key: ${{ secrets.ALIYUN_SSH_KEY }}
+          port: ${{ secrets.ALIYUN_PORT }}
+          timeout: 30s
+          script: |
+            echo "Waiting for app to be ready..."
+            sleep 5
+            if curl -fsS http://localhost:3300/ >/dev/null 2>&1; then
+              echo "✅ App is healthy (HTTP 200)"
+            else
+              echo "⚠️  App not responding yet, checking logs..."
+              sudo docker logs lighthouse-monitor --tail 20
             fi
-
-            cd "$PROJECT_DIR"
-
-            echo ">>> Pulling latest code..."
-            git pull origin main
-
-            echo ">>> Building & restarting..."
-            docker compose up -d --build --remove-orphans
-
-            echo ">>> Cleaning up old images..."
-            docker image prune -f
-
-            echo ">>> Health check..."
-            docker compose ps
-            sleep 3
-            curl -fsS -o /dev/null -w "HTTP %{http_code}" http://localhost:3300 && echo " OK" || echo " (warming up...)"
