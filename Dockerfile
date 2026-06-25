@@ -27,10 +27,17 @@ RUN pnpm db:setup
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
 
-# Copy serverExternalPackages into standalone .pnpm store.
-# Next.js nft does not trace packages in serverExternalPackages,
-# so lighthouse/chrome-launcher/etc. are missing from standalone node_modules.
-RUN node scripts/copy-externals.mjs
+# Standalone mode generates a minimal node_modules (only traced deps).
+# But serverExternalPackages (lighthouse/chrome-launcher/etc.) are NOT traced,
+# so they're missing from standalone node_modules at runtime.
+#
+# Instead of trying to manually copy external packages (which breaks because
+# their transitive deps are also missing), we replace standalone's minimal
+# node_modules with the full node_modules from the build stage.
+#
+# This makes the image larger but guarantees all packages are available.
+RUN rm -rf .next/standalone/node_modules \
+    && cp -r node_modules .next/standalone/node_modules
 
 # ============================================================
 # Stage 2: Production runtime
