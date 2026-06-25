@@ -86,6 +86,18 @@ export async function runLighthouseAudit(opts: RunOptions): Promise<{ recordId: 
     const reportPath = path.join(REPORTS_DIR, `${recordId}.json`)
     fs.writeFileSync(reportPath, JSON.stringify(lhr, null, 2), 'utf-8')
 
+    // 5b. 生成并保存 HTML 报告（Lighthouse 内置 ReportGenerator）
+    let htmlReportPath: string | null = null
+    try {
+      const ReportGenerator = (await import('lighthouse/report/generator/report-generator.js')).default
+      const html = ReportGenerator.generateReport(lhr, 'html')
+      const htmlPath = path.join(REPORTS_DIR, `${recordId}.html`)
+      fs.writeFileSync(htmlPath, html, 'utf-8')
+      htmlReportPath = htmlPath
+    } catch (htmlErr) {
+      console.warn('HTML report generation failed:', htmlErr)
+    }
+
     const elapsed = Math.round(performance.now() - start)
     await chrome.kill()
 
@@ -104,6 +116,7 @@ export async function runLighthouseAudit(opts: RunOptions): Promise<{ recordId: 
         si:  parsed.vitals.si,
         tti: parsed.vitals.tti,
         reportPath,
+        reportHtmlPath: htmlReportPath,
         durationMs: elapsed,
         completedAt: new Date(),
       })

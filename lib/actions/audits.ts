@@ -138,6 +138,7 @@ function mapAuditRecord(r: typeof auditRecords.$inferSelect): AuditRecord {
     si: r.si ?? null,
     tti: r.tti ?? null,
     reportPath: r.reportPath ?? null,
+    reportHtmlPath: r.reportHtmlPath ?? null,
     errorMsg: r.errorMsg ?? null,
     durationMs: r.durationMs ?? null,
     createdAt: r.createdAt,

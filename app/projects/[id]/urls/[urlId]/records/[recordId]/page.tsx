@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { getAuditDetail, getScoreTrend } from '@/lib/actions/audits'
 import ScoreTrendChart from '@/components/ScoreTrendChart'
 import { cn, formatDate, formatMs, getScoreColor, getScoreBgColor, getScoreLabel, CATEGORY_LABELS, DEVICE_LABELS } from '@/lib/utils'
-import { ArrowLeft, Clock, AlertCircle, Download, BarChart3, Zap, Monitor, Smartphone } from 'lucide-react'
+import { ArrowLeft, Clock, AlertCircle, Download, BarChart3, Zap, Monitor, Smartphone, FileText, ExternalLink } from 'lucide-react'
 import fs from 'fs'
 import { parseLhr } from '@/lib/lighthouse/parser'
 import type { ParsedReport } from '@/types'
@@ -73,7 +73,7 @@ export default async function AuditRecordDetailPage({
             )}
           </div>
         </div>
-        <div>
+        <div className="flex items-center gap-2">
           <span className={cn(
             'px-3 py-1.5 rounded-lg text-sm font-medium',
             detail.status === 'completed' ? 'bg-green-100 text-green-700' :
@@ -85,6 +85,18 @@ export default async function AuditRecordDetailPage({
              detail.status === 'failed' ? '失败' :
              detail.status === 'running' ? '运行中' : '等待中'}
           </span>
+          {detail.status === 'completed' && detail.reportHtmlPath && (
+            <a
+              href={`/api/report/${recordId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+            >
+              <FileText size={14} />
+              查看完整报告
+              <ExternalLink size={12} />
+            </a>
+          )}
         </div>
       </div>
 

@@ -42,6 +42,7 @@ export interface AuditRecord {
   si: number | null
   tti: number | null
   reportPath: string | null
+  reportHtmlPath: string | null
   errorMsg: string | null
   durationMs: number | null
   createdAt: Date

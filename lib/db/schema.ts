@@ -41,8 +41,9 @@ export const auditRecords = sqliteTable('audit_records', {
   si:    real('si'),
   tti:   real('tti'),
 
-  reportPath:  text('report_path'),
-  errorMsg:    text('error_msg'),
+  reportPath:     text('report_path'),
+  reportHtmlPath: text('report_html_path'),
+  errorMsg:       text('error_msg'),
   durationMs:  integer('duration_ms'),
   createdAt:   integer('created_at', { mode: 'timestamp' }).notNull(),
   completedAt: integer('completed_at', { mode: 'timestamp' }),
