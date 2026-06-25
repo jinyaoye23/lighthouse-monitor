@@ -1,7 +1,7 @@
-// @ts-check
+import type { NextConfig } from 'next'
+import type { Configuration } from 'webpack'
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   output: 'standalone',
   serverExternalPackages: [
     '@libsql/client',
@@ -9,7 +9,7 @@ const nextConfig = {
     'chrome-launcher',
     'chrome-remote-interface',
   ],
-  webpack: (config, { isServer }) => {
+  webpack: (config: Configuration, { isServer }: { isServer: boolean }) => {
     // Drizzle ORM internally references better-sqlite3 as a transitive type dependency.
     // We provide a null fallback so webpack doesn't fail resolving it during build.
     if (isServer) {
@@ -25,4 +25,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+export default nextConfig
