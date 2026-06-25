@@ -60,7 +60,7 @@ export async function runLighthouseAudit(opts: RunOptions): Promise<{ recordId: 
     const categories = JSON.parse(target.categories) as string[]
     const flags: Record<string, unknown> = {
       port: chrome.port,
-      output: 'json',
+      output: ['json', 'html'],
       onlyCategories: categories,
       formFactor: target.device,
       screenEmulation: {
@@ -72,30 +72,32 @@ export async function runLighthouseAudit(opts: RunOptions): Promise<{ recordId: 
       },
     }
 
-    // Lighthouse 实际用法可能因版本而异
     const runnerResult = await ReportGenerator(target.url, flags)
 
-    // 4. 解析报告
+    // 4. 提取 LHR 和报告
     const lhr = runnerResult?.lhr ?? runnerResult
     if (!lhr) throw new Error('Lighthouse returned empty result')
+
+    // output: ['json', 'html'] 时，runnerResult.report 是 [jsonStr, htmlStr]
+    const reports = runnerResult?.report
+    const jsonStr = Array.isArray(reports) ? reports[0] : (typeof reports === 'string' ? reports : JSON.stringify(lhr))
+    const htmlStr = Array.isArray(reports) ? (reports[1] ?? null) : null
 
     const parsed = parseLhr(lhr)
 
     // 5. 保存 JSON 报告
     ensureReportDir()
     const reportPath = path.join(REPORTS_DIR, `${recordId}.json`)
-    fs.writeFileSync(reportPath, JSON.stringify(lhr, null, 2), 'utf-8')
+    fs.writeFileSync(reportPath, typeof jsonStr === 'string' ? jsonStr : JSON.stringify(jsonStr, null, 2), 'utf-8')
 
-    // 5b. 生成并保存 HTML 报告（Lighthouse 内置 ReportGenerator）
+    // 5b. 保存 HTML 报告
     let htmlReportPath: string | null = null
-    try {
-      const ReportGenerator = (await import('lighthouse/report/generator/report-generator.js')).default
-      const html = ReportGenerator.generateReport(lhr, 'html')
+    if (htmlStr && typeof htmlStr === 'string') {
       const htmlPath = path.join(REPORTS_DIR, `${recordId}.html`)
-      fs.writeFileSync(htmlPath, html, 'utf-8')
+      fs.writeFileSync(htmlPath, htmlStr, 'utf-8')
       htmlReportPath = htmlPath
-    } catch (htmlErr) {
-      console.warn('HTML report generation failed:', htmlErr)
+    } else {
+      console.warn('Lighthouse HTML report not generated — output array may not be supported in this version')
     }
 
     const elapsed = Math.round(performance.now() - start)
