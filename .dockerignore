@@ -7,4 +7,4 @@ data
 .env.local
 .env.*.local
 .DS_Store
-next.config.ts
+# next.config.ts is REQUIRED for build — do NOT exclude
