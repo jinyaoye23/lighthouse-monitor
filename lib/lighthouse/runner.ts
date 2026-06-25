@@ -61,6 +61,7 @@ export async function runLighthouseAudit(opts: RunOptions): Promise<{ recordId: 
     const flags: Record<string, unknown> = {
       port: chrome.port,
       output: ['json', 'html'],
+      locale: 'zh',
       onlyCategories: categories,
       formFactor: target.device,
       screenEmulation: {
