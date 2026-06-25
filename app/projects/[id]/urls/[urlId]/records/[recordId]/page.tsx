@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getAuditDetail, getScoreTrend } from '@/lib/actions/audits'
 import ScoreTrendChart from '@/components/ScoreTrendChart'
-import { cn, formatDate, formatMs, getScoreColor, getScoreBgColor, getScoreLabel, CATEGORY_LABELS } from '@/lib/utils'
+import { cn, formatDate, formatMs, getScoreColor, getScoreBgColor, getScoreLabel, CATEGORY_LABELS, DEVICE_LABELS } from '@/lib/utils'
 import { ArrowLeft, Clock, AlertCircle, Download, BarChart3, Zap, Monitor, Smartphone } from 'lucide-react'
 import fs from 'fs'
 import { parseLhr } from '@/lib/lighthouse/parser'
@@ -63,7 +63,7 @@ export default async function AuditRecordDetailPage({
             <span>·</span>
             <span className="inline-flex items-center gap-1">
               {detail.targetUrl.device === 'mobile' ? <Smartphone size={14} /> : <Monitor size={14} />}
-              {detail.targetUrl.device === 'mobile' ? 'Mobile' : 'Desktop'}
+              {detail.targetUrl.device === 'mobile' ? DEVICE_LABELS.mobile : DEVICE_LABELS.desktop}
             </span>
             {detail.durationMs != null && (
               <>
@@ -134,12 +134,12 @@ export default async function AuditRecordDetailPage({
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 {([
-                  ['FCP', parsed.vitals.fcp, 'ms'],
-                  ['LCP', parsed.vitals.lcp, 'ms'],
-                  ['TBT', parsed.vitals.tbt, 'ms'],
-                  ['CLS', parsed.vitals.cls, ''],
-                  ['SI', parsed.vitals.si, 'ms'],
-                  ['TTI', parsed.vitals.tti, 'ms'],
+                  ['首次内容渲染 (FCP)', parsed.vitals.fcp, 'ms'],
+                  ['最大内容渲染 (LCP)', parsed.vitals.lcp, 'ms'],
+                  ['总阻塞时间 (TBT)',  parsed.vitals.tbt, 'ms'],
+                  ['累计布局偏移 (CLS)', parsed.vitals.cls, ''],
+                  ['速度指数 (SI)',     parsed.vitals.si,  'ms'],
+                  ['可交互时间 (TTI)',  parsed.vitals.tti, 'ms'],
                 ] as const).map(([label, value, unit]) => (
                   <div key={label} className="bg-gray-50 rounded-lg p-3 text-center">
                     <div className="text-xs text-gray-500 mb-1">{label}</div>

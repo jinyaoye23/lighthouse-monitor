@@ -4,7 +4,7 @@ import { useState } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
-import { CATEGORY_COLORS, CATEGORY_LABELS } from '@/lib/utils'
+import { CATEGORY_COLORS, CATEGORY_SHORT } from '@/lib/utils'
 
 type TrendData = {
   date: string
@@ -15,12 +15,6 @@ type TrendData = {
 }[]
 
 const CATEGORY_KEYS = ['performance', 'accessibility', 'bestPractices', 'seo'] as const
-const CATEGORY_LABEL_SHORT: Record<string, string> = {
-  performance: 'Perf',
-  accessibility: 'A11y',
-  bestPractices: 'BP',
-  seo: 'SEO',
-}
 
 /** 插值 null 值，避免折线断裂 */
 function interpolate(data: TrendData): TrendData {
@@ -58,7 +52,7 @@ function CustomTooltip({ active, payload, label }: any) {
             className="w-2.5 h-2.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: entry.color }}
           />
-          <span className="text-gray-600">{CATEGORY_LABEL_SHORT[entry.dataKey] ?? entry.name}:</span>
+          <span className="text-gray-600">{CATEGORY_SHORT[entry.dataKey] ?? entry.name}:</span>
           <span className="font-semibold text-gray-900">{entry.value ?? '—'}</span>
         </div>
       ))}
@@ -93,7 +87,7 @@ export default function ScoreTrendChart({ data }: { data: TrendData }) {
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend
-                formatter={(value: string) => CATEGORY_LABEL_SHORT[value] ?? value}
+                formatter={(value: string) => CATEGORY_SHORT[value] ?? value}
                 wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
               />
               {CATEGORY_KEYS.map((key, i) => (

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, Edit, Globe, Smartphone, Monitor, BarChart3, ExternalLink } from 'lucide-react'
 import { getProject } from '@/lib/actions/projects'
 import { getTargetUrls } from '@/lib/actions/urls'
-import { CATEGORY_LABELS } from '@/lib/utils'
+import { CATEGORY_LABELS, DEVICE_LABELS } from '@/lib/utils'
 import UrlCreateForm from './url-create-form'
 import UrlDeleteButton from './url-delete-button'
 
@@ -106,7 +106,7 @@ export default async function ProjectDetailPage({
                     </Link>
                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                        {url.device === 'mobile' ? '📱 Mobile' : '🖥 Desktop'}
+                        {url.device === 'mobile' ? `📱 ${DEVICE_LABELS.mobile}` : `🖥 ${DEVICE_LABELS.desktop}`}
                       </span>
                       {categories.map((cat) => (
                         <span

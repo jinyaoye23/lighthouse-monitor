@@ -5,7 +5,7 @@ import { db, schema } from '@/lib/db/client'
 import { getAuditRecords, getScoreTrend } from '@/lib/actions/audits'
 import { RunAuditButton } from './run-audit-button'
 import ScoreTrendChart from '@/components/ScoreTrendChart'
-import { cn, formatDate, formatMs, getScoreColor, getScoreBgColor, CATEGORY_LABELS } from '@/lib/utils'
+import { cn, formatDate, formatMs, getScoreColor, getScoreBgColor, CATEGORY_SHORT, DEVICE_LABELS } from '@/lib/utils'
 import { ArrowLeft, Monitor, Smartphone, Clock, ExternalLink } from 'lucide-react'
 import type { Metadata } from 'next'
 
@@ -63,14 +63,14 @@ export default async function UrlAuditPage({ params }: { params: Promise<{ id: s
             <div className="flex items-center gap-3 pt-1">
               <span className="inline-flex items-center gap-1 text-xs text-gray-500">
                 {target.device === 'mobile'
-                  ? <><Smartphone size={14} /> Mobile</>
-                  : <><Monitor size={14} /> Desktop</>
+                  ? <><Smartphone size={14} /> {DEVICE_LABELS.mobile}</>
+                  : <><Monitor size={14} /> {DEVICE_LABELS.desktop}</>
                 }
               </span>
               <div className="flex gap-1.5 flex-wrap">
                 {categories.map(c => (
                   <span key={c} className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600">
-                    {CATEGORY_LABELS[c] ?? c}
+                    {CATEGORY_SHORT[c] ?? c}
                   </span>
                 ))}
               </div>
@@ -96,7 +96,7 @@ export default async function UrlAuditPage({ params }: { params: Promise<{ id: s
                   )}>
                     {score ?? '—'}
                   </div>
-                  <div className="text-xs text-gray-500">{CATEGORY_LABELS[cat] ?? cat}</div>
+                  <div className="text-xs text-gray-500">{CATEGORY_SHORT[cat] ?? cat}</div>
                 </div>
               )
             })}
@@ -127,9 +127,9 @@ export default async function UrlAuditPage({ params }: { params: Promise<{ id: s
                 <tr className="bg-gray-50 text-left">
                   <th className="px-5 py-2.5 font-medium text-gray-500">时间</th>
                   <th className="px-5 py-2.5 font-medium text-gray-500">状态</th>
-                  <th className="px-5 py-2.5 font-medium text-gray-500">Perf</th>
-                  <th className="px-5 py-2.5 font-medium text-gray-500">A11y</th>
-                  <th className="px-5 py-2.5 font-medium text-gray-500">BP</th>
+                  <th className="px-5 py-2.5 font-medium text-gray-500">性能</th>
+                  <th className="px-5 py-2.5 font-medium text-gray-500">可访问性</th>
+                  <th className="px-5 py-2.5 font-medium text-gray-500">最佳实践</th>
                   <th className="px-5 py-2.5 font-medium text-gray-500">SEO</th>
                   <th className="px-5 py-2.5 font-medium text-gray-500">耗时</th>
                 </tr>

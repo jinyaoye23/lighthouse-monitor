@@ -37,16 +37,23 @@ export function getScoreBgColor(score: number | null): string {
 }
 
 export function getScoreLabel(score: number | null): string {
-  if (score === null || score === undefined) return 'N/A'
-  if (score >= 90) return 'Good'
-  if (score >= 50) return 'Needs Improvement'
-  return 'Poor'
+  if (score === null || score === undefined) return '暂无'
+  if (score >= 90) return '优秀'
+  if (score >= 50) return '需要改进'
+  return '较差'
 }
 
 export const CATEGORY_LABELS: Record<string, string> = {
-  performance: 'Performance',
-  accessibility: 'Accessibility',
-  'best-practices': 'Best Practices',
+  performance: '性能',
+  accessibility: '可访问性',
+  'best-practices': '最佳实践',
+  seo: 'SEO',
+}
+
+export const CATEGORY_SHORT: Record<string, string> = {
+  performance: '性能',
+  accessibility: '可访问性',
+  bestPractices: '最佳实践',
   seo: 'SEO',
 }
 
@@ -55,4 +62,10 @@ export const CATEGORY_COLORS: Record<string, string> = {
   accessibility: '#8b5cf6',
   'best-practices': '#f59e0b',
   seo: '#10b981',
+}
+
+/** 设备类型中文标签 */
+export const DEVICE_LABELS: Record<string, string> = {
+  mobile: '移动端',
+  desktop: '桌面端',
 }

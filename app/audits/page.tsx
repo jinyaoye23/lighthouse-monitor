@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { desc, sql } from 'drizzle-orm'
 import { db } from '@/lib/db/client'
 import { auditRecords, targetUrls, projects } from '@/lib/db/schema'
-import { cn, formatDate, formatMs, getScoreColor, CATEGORY_LABELS } from '@/lib/utils'
+import { cn, formatDate, formatMs, getScoreColor, DEVICE_LABELS } from '@/lib/utils'
 import { Activity, ExternalLink, Search } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -54,9 +54,9 @@ export default async function AuditsPage() {
                   <th className="px-5 py-2.5 font-medium text-gray-500">项目</th>
                   <th className="px-5 py-2.5 font-medium text-gray-500">URL</th>
                   <th className="px-5 py-2.5 font-medium text-gray-500">设备</th>
-                  <th className="px-5 py-2.5 font-medium text-gray-500">Perf</th>
-                  <th className="px-5 py-2.5 font-medium text-gray-500">A11y</th>
-                  <th className="px-5 py-2.5 font-medium text-gray-500">BP</th>
+                  <th className="px-5 py-2.5 font-medium text-gray-500">性能</th>
+                  <th className="px-5 py-2.5 font-medium text-gray-500">可访问性</th>
+                  <th className="px-5 py-2.5 font-medium text-gray-500">最佳实践</th>
                   <th className="px-5 py-2.5 font-medium text-gray-500">SEO</th>
                   <th className="px-5 py-2.5 font-medium text-gray-500">耗时</th>
                 </tr>
@@ -92,7 +92,7 @@ export default async function AuditsPage() {
                       </span>
                     </td>
                     <td className="px-5 py-3 text-gray-400 whitespace-nowrap">
-                      {u.device === 'mobile' ? '📱' : '🖥'}
+                      {u.device === 'mobile' ? `📱 ${DEVICE_LABELS.mobile}` : `🖥 ${DEVICE_LABELS.desktop}`}
                     </td>
                     <td className={cn('px-5 py-3 font-semibold', getScoreColor(r.scorePerformance ?? null))}>
                       {r.scorePerformance ?? '—'}
