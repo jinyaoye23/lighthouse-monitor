@@ -14,7 +14,8 @@ RUN corepack enable
 
 # Dependencies
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+# 关闭 minimumReleaseAge 策略——Docker build 中不需要校验包发布时间
+RUN pnpm config set minimumReleaseAge 0 && pnpm install --frozen-lockfile
 
 # Source
 COPY . .
