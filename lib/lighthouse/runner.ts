@@ -273,11 +273,18 @@ Object.defineProperty(navigator, 'deviceMemory', {
 
   } catch (err: unknown) {
     const elapsed = Math.round(performance.now() - start)
+    const message = err instanceof Error ? err.message : String(err)
+
+    // Log full error for debugging (Next.js production hides it behind a digest)
+    console.error('[Lighthouse Audit Error]', message)
+    if (err instanceof Error && err.stack) {
+      console.error('[Lighthouse Audit Stack]', err.stack)
+    }
 
     await db.update(schema.auditRecords)
       .set({
         status: 'failed',
-        errorMsg: err instanceof Error ? err.message : String(err),
+        errorMsg: message,
         durationMs: elapsed,
         completedAt: new Date(),
       })

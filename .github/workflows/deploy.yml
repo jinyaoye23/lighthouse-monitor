@@ -77,6 +77,8 @@ jobs:
             echo "Starting new container..."
             sudo docker run -d \
               --name "$CONTAINER_NAME" \
+              --init \
+              --shm-size=1g \
               -p 3300:3300 \
               -v lighthouse-monitor-data:/app/data \
               --memory="2g" \
