@@ -3,7 +3,7 @@ name: Deploy to Alibaba Cloud
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # 支持手动触发
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -21,7 +21,17 @@ jobs:
           script: |
             set -e
 
-            cd /opt/lighthouse-monitor
+            REPO_URL="https://${{ secrets.GIT_TOKEN }}@github.com/jinyaoye23/lighthouse-monitor.git"
+            PROJECT_DIR=/opt/lighthouse-monitor
+
+            # 首次部署自动 clone，后续自动 pull
+            if [ ! -d "$PROJECT_DIR" ]; then
+              echo ">>> First deploy: cloning repo..."
+              mkdir -p /opt
+              git clone "$REPO_URL" "$PROJECT_DIR"
+            fi
+
+            cd "$PROJECT_DIR"
 
             echo ">>> Pulling latest code..."
             git pull origin main
@@ -32,7 +42,7 @@ jobs:
             echo ">>> Cleaning up old images..."
             docker image prune -f
 
-            echo ">>> Checking status..."
+            echo ">>> Health check..."
             docker compose ps
             sleep 3
-            curl -s -o /dev/null -w "HTTP Status: %{http_code}" http://localhost:3300 || echo "(container may still be starting)"
+            curl -fsS -o /dev/null -w "HTTP %{http_code}" http://localhost:3300 && echo " OK" || echo " (warming up...)"
