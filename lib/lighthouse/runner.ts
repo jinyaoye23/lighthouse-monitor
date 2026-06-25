@@ -5,7 +5,6 @@
  * 但不会泄露任何凭据。JSON 报告保存到 data/reports/ 目录。
  */
 import { db, schema } from '@/lib/db/client'
-import { auditRecords, targetUrls } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import fs from 'fs'
@@ -51,6 +50,7 @@ export async function runLighthouseAudit(opts: RunOptions): Promise<{ recordId: 
     const lighthouse = await import('lighthouse')
     const chromeLauncher = await import('chrome-launcher')
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ReportGenerator = (lighthouse as any).default ?? lighthouse
 
     const chrome = await chromeLauncher.launch({

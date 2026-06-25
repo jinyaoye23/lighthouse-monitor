@@ -3,7 +3,7 @@ import { desc, sql } from 'drizzle-orm'
 import { db } from '@/lib/db/client'
 import { auditRecords, targetUrls, projects } from '@/lib/db/schema'
 import { cn, formatDate, formatMs, getScoreColor, DEVICE_LABELS } from '@/lib/utils'
-import { Activity, ExternalLink, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 

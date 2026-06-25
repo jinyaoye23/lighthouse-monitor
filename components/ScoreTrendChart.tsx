@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
@@ -41,12 +40,16 @@ function interpolate(data: TrendData): TrendData {
   })
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+function CustomTooltip({ active, payload, label }: {
+  active?: boolean
+  payload?: Array<{ dataKey: string; color: string; value: number | null; name: string }>
+  label?: string
+}) {
   if (!active || !payload?.length) return null
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm">
       <p className="text-gray-500 mb-2">{label}</p>
-      {payload.map((entry: any) => (
+      {payload.map((entry) => (
         <div key={entry.dataKey} className="flex items-center gap-2 py-0.5">
           <span
             className="w-2.5 h-2.5 rounded-full flex-shrink-0"
@@ -90,7 +93,7 @@ export default function ScoreTrendChart({ data }: { data: TrendData }) {
                 formatter={(value: string) => CATEGORY_SHORT[value] ?? value}
                 wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
               />
-              {CATEGORY_KEYS.map((key, i) => (
+              {CATEGORY_KEYS.map((key) => (
                 <Line
                   key={key}
                   type="monotone"

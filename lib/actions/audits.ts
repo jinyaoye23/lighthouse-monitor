@@ -1,9 +1,8 @@
 'use server'
 
-import { db, schema } from '@/lib/db/client'
+import { db } from '@/lib/db/client'
 import { auditRecords, targetUrls, projects } from '@/lib/db/schema'
 import { eq, desc, and, sql, asc } from 'drizzle-orm'
-import { nanoid } from 'nanoid'
 import type { AuditRecord, AuditDetail, AuditRecordPage, PaginationOpts } from '@/types'
 import { runLighthouseAudit } from '@/lib/lighthouse/runner'
 

@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { FolderOpen, Plus, MoreHorizontal, Trash2, ExternalLink, Edit } from 'lucide-react'
-import { getProjects, deleteProject } from '@/lib/actions/projects'
+import { FolderOpen, Plus, ExternalLink, Edit } from 'lucide-react'
+import { getProjects } from '@/lib/actions/projects'
 import { getScoreColor, getScoreBgColor, formatDate } from '@/lib/utils'
 import DeleteButton from './delete-button'
 

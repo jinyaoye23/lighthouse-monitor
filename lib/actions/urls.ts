@@ -3,7 +3,7 @@
 import { db } from '@/lib/db/client'
 import { targetUrls } from '@/lib/db/schema'
 import { nanoid } from 'nanoid'
-import { eq, and, desc, sql } from 'drizzle-orm'
+import { eq, desc } from 'drizzle-orm'
 import type { TargetUrl } from '@/types'
 
 export async function createTargetUrl(data: {

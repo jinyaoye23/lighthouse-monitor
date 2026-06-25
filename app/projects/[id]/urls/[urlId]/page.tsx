@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { eq } from 'drizzle-orm'
 import { db, schema } from '@/lib/db/client'
@@ -6,13 +6,14 @@ import { getAuditRecords, getScoreTrend } from '@/lib/actions/audits'
 import { RunAuditButton } from './run-audit-button'
 import ScoreTrendChart from '@/components/ScoreTrendChart'
 import { cn, formatDate, formatMs, getScoreColor, getScoreBgColor, CATEGORY_SHORT, DEVICE_LABELS } from '@/lib/utils'
-import { ArrowLeft, Monitor, Smartphone, Clock, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Monitor, Smartphone, ExternalLink } from 'lucide-react'
 import type { Metadata } from 'next'
+import type { AuditRecord } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string; urlId: string }> }): Promise<Metadata> {
-  const { id, urlId } = await params
+  const { urlId } = await params
   const rows = await db.select().from(schema.targetUrls).where(eq(schema.targetUrls.id, urlId))
   if (rows.length === 0) return { title: 'Not Found' }
   return { title: `${rows[0].alias || rows[0].url} — 检测记录` }
@@ -31,7 +32,7 @@ export default async function UrlAuditPage({ params }: { params: Promise<{ id: s
   const trendData = await getScoreTrend(urlId)
 
   // 最新一条已完成记录
-  const latestCompleted = records.find(r => r.status === 'completed')
+  const latestCompleted = records.find((r: AuditRecord) => r.status === 'completed')
 
   return (
     <div className="space-y-6">

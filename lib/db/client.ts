@@ -30,11 +30,12 @@ function getDb(): LibSQLDatabase<typeof schema> {
   try {
     _db = drizzle(getClient(), { schema })
     return _db
-  } catch (err) {
+  } catch {
     // If DB initialization fails (native deps missing in build/CI),
     // provide a lightweight mock that is chainable and thenable so
     // server-side code executed during Next.js build won't crash.
     const createThenable = (val: unknown) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fn: any = () => fn
       fn.then = (resolve: (v: unknown) => void) => { resolve(val) }
       return fn

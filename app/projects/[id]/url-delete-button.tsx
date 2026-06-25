@@ -9,11 +9,9 @@ import { deleteTargetUrl } from '@/lib/actions/urls'
 export default function UrlDeleteButton({
   urlId,
   urlAlias,
-  projectId,
 }: {
   urlId: string
   urlAlias: string
-  projectId: string
 }) {
   const router = useRouter()
   const [confirming, setConfirming] = useState(false)
