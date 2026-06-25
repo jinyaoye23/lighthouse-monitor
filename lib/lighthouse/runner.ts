@@ -170,24 +170,49 @@ Object.defineProperty(navigator, 'deviceMemory', {
     }
 
     const categories = JSON.parse(target.categories) as string[]
+    // 根据设备类型选择 Lighthouse 预设，与 Chrome DevTools 完全一致
+    const isMobile = target.device === 'mobile'
+
     const flags: Record<string, unknown> = {
       port: chrome.port,
       output: ['json', 'html'],
       locale: 'zh',
       onlyCategories: categories,
+      // 关键：使用 simulate 模式匹配 Chrome DevTools Lighthouse 评分
+      // simulate = 灯笼模拟（DevTools 默认）；devtools = 实际 CPU/网络节流（更悲观）
+      throttlingMethod: 'simulate',
+      throttling: isMobile
+        ? {
+            // 移动端：模拟 4x CPU 降速 + Slow 4G
+            cpuSlowdownMultiplier: 4,
+            downloadThroughputKbps: 1.6 * 1024,
+            uploadThroughputKbps: 750,
+            rttMs: 150,
+            throughputKbps: 1.6 * 1024,
+            requestLatencyMs: 150 * 3.75,
+          }
+        : {
+            // 桌面端：模拟轻度节流（与 DevTools Desktop 预设一致）
+            cpuSlowdownMultiplier: 1,
+            downloadThroughputKbps: 0,
+            uploadThroughputKbps: 0,
+            rttMs: 40,
+            throughputKbps: 10 * 1024,
+            requestLatencyMs: 0,
+          },
       formFactor: target.device,
-      // 伪装真实浏览器请求头（百度等网站会检查 User-Agent / Accept-Language）
+      // 伪装真实浏览器请求头
       extraHeaders: {
-        'User-Agent': target.device === 'mobile'
+        'User-Agent': isMobile
           ? 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
           : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
       },
       screenEmulation: {
-        mobile: target.device === 'mobile',
-        width: target.device === 'mobile' ? 375 : 1350,
-        height: target.device === 'mobile' ? 812 : 940,
-        deviceScaleFactor: 1,
+        mobile: isMobile,
+        width: isMobile ? 412 : 1350,
+        height: isMobile ? 823 : 940,
+        deviceScaleFactor: isMobile ? 2.625 : 1,
         disabled: false,
       },
     }
