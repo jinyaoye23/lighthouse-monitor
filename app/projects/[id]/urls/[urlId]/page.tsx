@@ -2,8 +2,9 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { eq } from 'drizzle-orm'
 import { db, schema } from '@/lib/db/client'
-import { getAuditRecords } from '@/lib/actions/audits'
+import { getAuditRecords, getScoreTrend } from '@/lib/actions/audits'
 import { RunAuditButton } from './run-audit-button'
+import ScoreTrendChart from '@/components/ScoreTrendChart'
 import { cn, formatDate, formatMs, getScoreColor, getScoreBgColor, CATEGORY_LABELS } from '@/lib/utils'
 import { ArrowLeft, Monitor, Smartphone, Clock, ExternalLink } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -27,6 +28,7 @@ export default async function UrlAuditPage({ params }: { params: Promise<{ id: s
   const categories = JSON.parse(target.categories) as string[]
 
   const { records } = await getAuditRecords(urlId)
+  const trendData = await getScoreTrend(urlId)
 
   // 最新一条已完成记录
   const latestCompleted = records.find(r => r.status === 'completed')
@@ -74,7 +76,7 @@ export default async function UrlAuditPage({ params }: { params: Promise<{ id: s
               </div>
             </div>
           </div>
-          <RunAuditButton targetUrlId={urlId} />
+          <RunAuditButton targetUrlId={urlId} projectId={projectId} urlId={urlId} />
         </div>
       </div>
 
@@ -101,6 +103,9 @@ export default async function UrlAuditPage({ params }: { params: Promise<{ id: s
           </div>
         </div>
       )}
+
+      {/* 趋势图 */}
+      {trendData.length >= 2 && <ScoreTrendChart data={trendData} />}
 
       {/* 检测记录列表 */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">

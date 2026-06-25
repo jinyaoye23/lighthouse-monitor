@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Play } from 'lucide-react'
 import { triggerAudit } from '@/lib/actions/audits'
 
-export function RunAuditButton({ targetUrlId }: { targetUrlId: string }) {
+export function RunAuditButton({ targetUrlId, projectId, urlId }: { targetUrlId: string; projectId: string; urlId: string }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
 
@@ -13,8 +13,7 @@ export function RunAuditButton({ targetUrlId }: { targetUrlId: string }) {
     startTransition(async () => {
       try {
         const result = await triggerAudit(targetUrlId)
-        // Navigate to the record detail page
-        router.push(`records/${result.recordId}`)
+        router.push(`/projects/${projectId}/urls/${urlId}/records/${result.recordId}`)
       } catch (err) {
         alert(err instanceof Error ? err.message : '检测失败')
       }

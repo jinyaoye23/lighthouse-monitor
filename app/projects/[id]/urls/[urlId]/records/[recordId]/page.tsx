@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getAuditDetail } from '@/lib/actions/audits'
+import { getAuditDetail, getScoreTrend } from '@/lib/actions/audits'
+import ScoreTrendChart from '@/components/ScoreTrendChart'
 import { cn, formatDate, formatMs, getScoreColor, getScoreBgColor, getScoreLabel, CATEGORY_LABELS } from '@/lib/utils'
 import { ArrowLeft, Clock, AlertCircle, Download, BarChart3, Zap, Monitor, Smartphone } from 'lucide-react'
 import fs from 'fs'
@@ -26,6 +27,8 @@ export default async function AuditRecordDetailPage({
 
   const detail = await getAuditDetail(recordId)
   if (!detail) notFound()
+
+  const trendData = await getScoreTrend(urlId)
 
   // 加载完整报告
   let parsed: ParsedReport | null = null
@@ -193,6 +196,9 @@ export default async function AuditRecordDetailPage({
               </div>
             </div>
           )}
+
+          {/* 趋势图 */}
+          {trendData.length >= 2 && <ScoreTrendChart data={trendData} />}
         </>
       )}
 
