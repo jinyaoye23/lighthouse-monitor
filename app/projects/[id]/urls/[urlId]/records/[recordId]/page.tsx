@@ -40,7 +40,7 @@ export default async function AuditRecordDetailPage({
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-500">
         <Link href={`/projects/${projectId}`} className="hover:text-gray-700 transition-colors">

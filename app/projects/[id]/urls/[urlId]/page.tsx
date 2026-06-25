@@ -34,7 +34,7 @@ export default async function UrlAuditPage({ params }: { params: Promise<{ id: s
   const latestCompleted = records.find(r => r.status === 'completed')
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* 返回链接 */}
       <Link
         href={`/projects/${projectId}`}

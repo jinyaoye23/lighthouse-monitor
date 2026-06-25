@@ -30,7 +30,7 @@ export default async function AuditsPage() {
     .limit(50)
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">检测记录</h1>
         <p className="text-gray-500 mt-1 text-sm">所有项目的最新检测记录一览</p>
