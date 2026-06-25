@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     'chrome-launcher',
     'chrome-remote-interface',
   ],
-  webpack: (config: Record<string, unknown>, { isServer }: { isServer: boolean }) => {
+  webpack: (config: any, { isServer }: { isServer: boolean }) => {
     // Drizzle ORM internally references better-sqlite3 as a transitive type dependency.
     // We provide a null fallback so webpack doesn't fail resolving it during build.
     if (isServer) {
