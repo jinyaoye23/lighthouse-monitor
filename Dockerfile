@@ -27,6 +27,37 @@ RUN pnpm db:setup
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
 
+# Copy serverExternalPackages into standalone .pnpm store
+# Next.js nft does not trace packages listed in serverExternalPackages,
+# so lighthouse/chrome-launcher/etc. are missing from standalone node_modules.
+RUN node -e "
+const fs = require('fs');
+const path = require('path');
+const pnpmDir = '/app/node_modules/.pnpm';
+const destBase = '/app/.next/standalone/node_modules';
+const destPnpm = path.join(destBase, '.pnpm');
+const pkgs = ['lighthouse', 'chrome-launcher', 'chrome-remote-interface'];
+
+for (const pkg of pkgs) {
+  const entries = fs.readdirSync(pnpmDir).filter(d => d.startsWith(pkg + '@'));
+  for (const entry of entries) {
+    const src = path.join(pnpmDir, entry, 'node_modules', pkg);
+    const dest = path.join(destPnpm, entry, 'node_modules', pkg);
+    if (fs.existsSync(src) && !fs.existsSync(dest)) {
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.cpSync(src, dest, { recursive: true });
+      console.log('Copied ' + entry + ' to standalone store');
+    }
+    // Create symlink at node_modules root so Node.js can resolve require(pkg)
+    const link = path.join(destBase, pkg);
+    if (!fs.existsSync(link)) {
+      fs.symlinkSync(path.join('.pnpm', entry, 'node_modules', pkg), link, 'dir');
+      console.log('Created symlink node_modules/' + pkg);
+    }
+  }
+}
+"
+
 # ============================================================
 # Stage 2: Production runtime
 # ============================================================
