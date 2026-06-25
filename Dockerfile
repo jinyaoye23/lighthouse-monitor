@@ -4,12 +4,12 @@
 FROM node:22-slim AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 make g++ \
+    python3 make g++ pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# pnpm — 锁定 9.x 版本避免 10.x 的 ignoredBuilds 安全策略
+# pnpm �?锁定 9.x 版本避免 10.x �?ignoredBuilds 安全策略
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 # Dependencies
@@ -18,6 +18,10 @@ RUN pnpm install --frozen-lockfile
 
 # Source
 COPY . .
+
+# Run DB migration to create tables before Next.js build
+# (Next.js statically prerenders pages that query the DB)
+RUN pnpm db:setup
 
 # Build Next.js standalone
 ENV NEXT_TELEMETRY_DISABLED=1

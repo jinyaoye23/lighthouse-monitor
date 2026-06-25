@@ -7,3 +7,5 @@ data
 .env.local
 .env.*.local
 .DS_Store
+next.config.ts
+types/
