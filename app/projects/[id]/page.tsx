@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, Edit, Globe, Smartphone, Monitor, BarChart3 } from 'lucide-react'
+import { ArrowLeft, Edit, Globe, Smartphone, Monitor, BarChart3, ExternalLink } from 'lucide-react'
 import { getProject } from '@/lib/actions/projects'
 import { getTargetUrls } from '@/lib/actions/urls'
 import { CATEGORY_LABELS } from '@/lib/utils'
@@ -77,7 +77,7 @@ export default async function ProjectDetailPage({
               return (
                 <div
                   key={url.id}
-                  className="flex items-center gap-4 p-4 rounded-xl border border-border bg-white hover:shadow-sm transition-shadow"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-border bg-white hover:shadow-sm transition-shadow group"
                 >
                   {/* Device icon */}
                   <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
@@ -88,10 +88,13 @@ export default async function ProjectDetailPage({
                     )}
                   </div>
 
-                  {/* URL info */}
+                  {/* URL info — clickable */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm truncate max-w-md" title={url.url}>
+                    <Link
+                      href={`/projects/${id}/urls/${url.id}`}
+                      className="flex items-center gap-2 group/link"
+                    >
+                      <span className="font-mono text-sm truncate max-w-md group-hover/link:text-indigo-600 transition-colors" title={url.url}>
                         {url.url}
                       </span>
                       {url.alias && (
@@ -99,7 +102,8 @@ export default async function ProjectDetailPage({
                           {url.alias}
                         </span>
                       )}
-                    </div>
+                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                    </Link>
                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                         {url.device === 'mobile' ? '📱 Mobile' : '🖥 Desktop'}
@@ -117,15 +121,12 @@ export default async function ProjectDetailPage({
 
                   {/* Actions */}
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    <span className="text-xs text-muted-foreground mr-2">
-                      {url.timeoutSecs}s
-                    </span>
-                    <button
-                      className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors"
-                      title="手动触发检测"
+                    <Link
+                      href={`/projects/${id}/urls/${url.id}`}
+                      className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors"
                     >
                       检测
-                    </button>
+                    </Link>
                     <UrlDeleteButton
                       urlId={url.id}
                       urlAlias={url.alias || url.url}
