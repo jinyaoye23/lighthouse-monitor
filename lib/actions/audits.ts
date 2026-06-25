@@ -109,9 +109,21 @@ export async function getScoreTrend(
   }))
 }
 
-/** 手动触发检测 */
-export async function triggerAudit(targetUrlId: string): Promise<{ recordId: string }> {
-  return runLighthouseAudit({ targetUrlId, triggeredBy: 'manual' })
+/** 手动触发检测 — 返回结构化结果，避免生产环境吞掉错误信息 */
+export async function triggerAudit(
+  targetUrlId: string
+): Promise<{ ok: true; recordId: string } | { ok: false; error: string }> {
+  try {
+    const result = await runLighthouseAudit({ targetUrlId, triggeredBy: 'manual' })
+    return { ok: true, recordId: result.recordId }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[triggerAudit]', message)
+    if (err instanceof Error && err.stack) {
+      console.error('[triggerAudit stack]', err.stack)
+    }
+    return { ok: false, error: message }
+  }
 }
 
 /** 删除检测记录 */

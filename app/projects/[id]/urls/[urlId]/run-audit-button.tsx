@@ -14,10 +14,14 @@ export function RunAuditButton({ targetUrlId, projectId, urlId }: { targetUrlId:
     startTransition(async () => {
       try {
         const result = await triggerAudit(targetUrlId)
-        toast.success('检测已完成')
-        router.push(`/projects/${projectId}/urls/${urlId}/records/${result.recordId}`)
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : '检测执行失败，请重试')
+        if (result.ok) {
+          toast.success('检测已完成')
+          router.push(`/projects/${projectId}/urls/${urlId}/records/${result.recordId}`)
+        } else {
+          toast.error(result.error || '检测执行失败，请重试')
+        }
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : '请求失败，请重试')
       }
     })
   }
