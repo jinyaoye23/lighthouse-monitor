@@ -33,7 +33,7 @@ export async function createTargetUrl(data: {
 }
 
 export async function getTargetUrls(projectId: string): Promise<TargetUrl[]> {
-  const rows = db.select().from(targetUrls)
+  const rows = await db.select().from(targetUrls)
     .where(eq(targetUrls.projectId, projectId))
     .orderBy(desc(targetUrls.createdAt))
   return rows as unknown as TargetUrl[]

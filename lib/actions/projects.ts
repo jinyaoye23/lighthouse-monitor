@@ -35,37 +35,45 @@ export async function createProject(data: {
 }
 
 export async function getProjects() {
-  const rows = db.all<Record<string, unknown>>(sql`
-    SELECT
-      p.id, p.name, p.description, p.color, p.created_at, p.updated_at,
-      COALESCE(tu.url_count, 0) AS url_count,
-      tu.last_audit_at,
-      tu.avg_score
-    FROM projects p
-    LEFT JOIN (
-      SELECT
-        project_id,
-        COUNT(*) AS url_count,
-        MAX(ar.created_at) AS last_audit_at,
-        ROUND(AVG(ar.score_performance), 0) AS avg_score
-      FROM target_urls
-      LEFT JOIN audit_records ar ON ar.target_url_id = target_urls.id
-      GROUP BY project_id
-    ) tu ON tu.project_id = p.id
-    ORDER BY p.updated_at DESC
-  `)
+  // Use drizzle query builder — compatible across all drivers
+  const allProjects = await db.select().from(projects).orderBy(desc(projects.updatedAt))
 
-  return rows.map(row => ({
-    id: row.id,
-    name: row.name,
-    description: (row.description as string) ?? null,
-    color: (row.color as string) ?? null,
-    createdAt: new Date(row.created_at as number),
-    updatedAt: new Date(row.updated_at as number),
-    urlCount: Number(row.url_count),
-    lastAuditAt: row.last_audit_at ? new Date(row.last_audit_at as number) : null,
-    avgScore: row.avg_score !== null ? Number(row.avg_score) : null,
-  }))
+  // Fetch URL stats separately (avoids raw SQL driver differences)
+  const stats = await db
+    .select({
+      projectId: targetUrls.projectId,
+      count: sql<number>`COUNT(*)`.mapWith(Number),
+      lastAuditAt: sql<number | null>`MAX(${auditRecords.createdAt})`.mapWith((v) => v ? Number(v) : null),
+      avgScore: sql<number | null>`ROUND(AVG(${auditRecords.scorePerformance}), 0)`.mapWith((v) => v !== null ? Number(v) : null),
+    })
+    .from(targetUrls)
+    .leftJoin(auditRecords, eq(auditRecords.targetUrlId, targetUrls.id))
+    .groupBy(targetUrls.projectId)
+
+  // Build stats map
+  const statsMap = new Map<string, { urlCount: number; lastAuditAt: Date | null; avgScore: number | null }>()
+  for (const s of stats) {
+    statsMap.set(s.projectId, {
+      urlCount: s.count,
+      lastAuditAt: s.lastAuditAt ? new Date(s.lastAuditAt) : null,
+      avgScore: s.avgScore,
+    })
+  }
+
+  return allProjects.map((p) => {
+    const stat = statsMap.get(p.id)
+    return {
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      color: p.color,
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt,
+      urlCount: stat?.urlCount ?? 0,
+      lastAuditAt: stat?.lastAuditAt ?? null,
+      avgScore: stat?.avgScore ?? null,
+    }
+  })
 }
 
 export async function getProject(id: string): Promise<Project | null> {

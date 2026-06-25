@@ -11,7 +11,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "better-sqlite3": "^11.0.0",
+    "@libsql/client": "^0.14.0",
     "chrome-launcher": "^1.0.0",
     "clsx": "^2.1.0",
     "drizzle-orm": "^0.36.0",
@@ -27,13 +27,16 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/better-sqlite3": "^7.6.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "drizzle-kit": "^0.30.0",
     "eslint": "^9",
     "eslint-config-next": "15.1.0",
     "tailwindcss": "^4",
     "typescript": "^5.7.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "sharp", "unrs-resolver"]
   }
 }
