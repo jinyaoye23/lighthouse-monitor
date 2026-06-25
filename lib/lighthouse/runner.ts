@@ -54,7 +54,17 @@ export async function runLighthouseAudit(opts: RunOptions): Promise<{ recordId: 
     const ReportGenerator = (lighthouse as any).default ?? lighthouse
 
     const chrome = await chromeLauncher.launch({
-      chromeFlags: ['--headless=new', '--no-sandbox', '--disable-gpu'],
+      chromeFlags: [
+        '--headless=new',
+        '--no-sandbox',
+        '--disable-gpu',
+        // 绕过反爬虫/反无头浏览器检测（如百度系站点）
+        '--disable-blink-features=AutomationControlled',
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--no-first-run',
+        '--no-default-browser-check',
+        '--disable-dev-shm-usage',
+      ],
     })
 
     const categories = JSON.parse(target.categories) as string[]
@@ -64,6 +74,13 @@ export async function runLighthouseAudit(opts: RunOptions): Promise<{ recordId: 
       locale: 'zh',
       onlyCategories: categories,
       formFactor: target.device,
+      // 伪装真实浏览器请求头（百度等网站会检查 User-Agent / Accept-Language）
+      extraHeaders: {
+        'User-Agent': target.device === 'mobile'
+          ? 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+          : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+      },
       screenEmulation: {
         mobile: target.device === 'mobile',
         width: target.device === 'mobile' ? 375 : 1350,
