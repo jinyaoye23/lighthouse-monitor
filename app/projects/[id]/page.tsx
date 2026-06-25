@@ -7,6 +7,8 @@ import { CATEGORY_LABELS, DEVICE_LABELS } from '@/lib/utils'
 import UrlCreateForm from './url-create-form'
 import UrlDeleteButton from './url-delete-button'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProjectDetailPage({
   params: paramsPromise,
 }: {

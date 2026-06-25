@@ -4,6 +4,8 @@ import { getProjects } from '@/lib/actions/projects'
 import { getScoreColor, getScoreBgColor, formatDate } from '@/lib/utils'
 import DeleteButton from './delete-button'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProjectsPage() {
   const projects = await getProjects()
 
