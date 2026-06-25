@@ -9,15 +9,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# pnpm
-RUN corepack enable
+# pnpm — 锁定 9.x 版本避免 10.x 的 ignoredBuilds 安全策略
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 # Dependencies
-COPY package.json pnpm-lock.yaml ./
-# pnpm 10.x 默认忽略构建脚本 + 最小发布时间校验，Docker 构建中不需要这两项安全策略
-RUN pnpm config set minimumReleaseAge 0 \
-    && pnpm config set ignore-scripts false \
-    && pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml .npmrc ./
+RUN pnpm install --frozen-lockfile
 
 # Source
 COPY . .
