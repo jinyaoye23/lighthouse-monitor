@@ -83,7 +83,8 @@ ENV HOME=/home/nextjs
 
 USER nextjs
 
-EXPOSE 3000
+EXPOSE 3300
 
 # Start Next.js server (standalone output has server.js)
+ENV PORT=3300
 CMD ["node", "server.js"]

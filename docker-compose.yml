@@ -4,7 +4,7 @@ services:
     container_name: lighthouse-monitor
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3300:3300"
     volumes:
       # 持久化 SQLite + 检测报告
       - app_data:/app/data
