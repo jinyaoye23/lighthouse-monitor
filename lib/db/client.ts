@@ -35,7 +35,7 @@ function getDb(): LibSQLDatabase<typeof schema> {
 export const db = new Proxy({} as LibSQLDatabase<typeof schema>, {
   get(_target, prop) {
     const real = getDb()
-    const val = (real as Record<string | symbol, unknown>)[prop]
+    const val = (real as unknown as Record<string | symbol, unknown>)[prop]
     if (typeof val === 'function') {
       return (...args: unknown[]) => (val as (...a: unknown[]) => unknown).apply(real, args)
     }

@@ -64,7 +64,7 @@ export async function getAuditDetail(id: string): Promise<AuditDetail | null> {
       alias: r.target_urls.alias ?? null,
       device: r.target_urls.device as 'mobile' | 'desktop',
       categories: r.target_urls.categories,
-      timeoutSecs: r.target_urls.timeoutSecs,
+      timeoutSecs: r.target_urls.timeoutSecs ?? 60,
       createdAt: r.target_urls.createdAt,
       updatedAt: r.target_urls.updatedAt,
     },
