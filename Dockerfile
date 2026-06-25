@@ -10,14 +10,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable
 
-# Dependencies (cache layer)
-COPY pnpm-lock.yaml ./
-RUN pnpm fetch
-
-COPY package.json ./
-RUN pnpm install --offline --frozen-lockfile
+# Dependencies
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # Source
 COPY . .
