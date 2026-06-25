@@ -75,6 +75,9 @@ COPY --from=builder /app/.next/static ./.next/static
 # Copy public if exists
 COPY --from=builder /app/public ./public
 
+# Copy DB init script (runs at container startup, before server.js)
+COPY --from=builder /app/scripts/init-db.mjs ./scripts/init-db.mjs
+
 # Ensure data directory exists + is writable
 RUN mkdir -p data/reports && chown -R nextjs:nodejs data
 
@@ -86,6 +89,6 @@ USER nextjs
 
 EXPOSE 3300
 
-# Start Next.js server (standalone output has server.js)
+# Start: init DB tables, then launch Next.js server
 ENV PORT=3300
-CMD ["node", "server.js"]
+CMD sh -c "node scripts/init-db.mjs && node server.js"
