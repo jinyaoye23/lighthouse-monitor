@@ -57,94 +57,16 @@ export async function runLighthouseAudit(opts: RunOptions): Promise<{ recordId: 
       chromeFlags: [
         '--headless=new',
         '--no-sandbox',
-        // 基础兼容性标志（Docker 必需）
+        // Docker 最小必需标志
         '--no-first-run',
         '--no-default-browser-check',
-        '--disable-dev-shm-usage',
-        // 反检测：仅保留对性能无影响的标志
-        '--disable-blink-features=AutomationControlled',
+        // 注意：不要加 --disable-dev-shm-usage（docker-compose 已设 --shm-size=1g）
+        // 该标志把共享内存操作回退到 /tmp 磁盘 IO，严重拖慢渲染性能
         `--user-agent=${target.device === 'mobile'
           ? 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
           : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}`,
       ],
     })
-
-    // 注入反检测 JS 脚本（通过 CDP），在每一次页面导航前执行
-    try {
-      const cdp = await import('chrome-remote-interface')
-      const client = await cdp.default({ port: chrome.port })
-      const { Page } = client
-      await Page.enable()
-      await Page.addScriptToEvaluateOnNewDocument({
-        source: `
-// === Anti-detection script for headless Chrome ===
-// 覆盖 navigator.webdriver（百度核心检测点）
-Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-
-// 模拟真实 Chrome 的 plugins 数组（headless 下为空 → 暴露）
-Object.defineProperty(navigator, 'plugins', {
-  get: () => {
-    const plugins = [1, 2, 3, 4, 5];
-    plugins.item = i => plugins[i];
-    plugins.namedItem = () => null;
-    plugins.refresh = () => {};
-    return plugins;
-  }
-});
-
-// 模拟 languages
-Object.defineProperty(navigator, 'languages', {
-  get: () => ['zh-CN', 'zh', 'en-US', 'en']
-});
-
-// 模拟 chrome.runtime
-window.chrome = window.chrome || {};
-window.chrome.runtime = window.chrome.runtime || {};
-
-// 绕过 permissions 检测
-const originalQuery = window.navigator.permissions.query.bind(window.navigator.permissions);
-window.navigator.permissions.query = (parameters) => {
-  if (parameters.name === 'notifications') {
-    return Promise.resolve({ state: Notification.permission, onchange: null });
-  }
-  return originalQuery(parameters);
-};
-
-// 模拟 platform 为 Windows
-Object.defineProperty(navigator, 'platform', {
-  get: () => 'Win32'
-});
-
-// 移除 "HeadlessChrome" 字样（如果存在）
-Object.defineProperty(navigator, 'userAgent', {
-  get: () => '${target.device === 'mobile'
-    ? 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
-    : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}'
-});
-
-// 模拟 WebGL 指纹（headless 下通常返回不同的 vendor/renderer）
-const getParameterProto = WebGLRenderingContext.prototype.getParameter;
-WebGLRenderingContext.prototype.getParameter = function(parameter) {
-  if (parameter === 37445) return 'Google Inc. (Intel)';  // UNMASKED_VENDOR_WEBGL
-  if (parameter === 37446) return 'ANGLE (Intel, Intel(R) UHD Graphics Direct3D11 vs_5_0 ps_5_0, D3D11)';  // UNMASKED_RENDERER_WEBGL
-  return getParameterProto.call(this, parameter);
-};
-WebGL2RenderingContext.prototype.getParameter = WebGLRenderingContext.prototype.getParameter;
-
-// 模拟真实的 hardwareConcurrency（headless 有时为 1）
-Object.defineProperty(navigator, 'hardwareConcurrency', {
-  get: () => 8
-});
-
-// 模拟真实的 deviceMemory
-Object.defineProperty(navigator, 'deviceMemory', {
-  get: () => 8
-});
-` })
-      await client.close()
-    } catch (cdpErr) {
-      console.warn('CDP stealth injection failed (non-fatal):', cdpErr)
-    }
 
     const categories = JSON.parse(target.categories) as string[]
     // 根据设备类型选择 Lighthouse 预设，与 Chrome DevTools 完全一致
