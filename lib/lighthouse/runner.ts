@@ -57,35 +57,12 @@ export async function runLighthouseAudit(opts: RunOptions): Promise<{ recordId: 
       chromeFlags: [
         '--headless=new',
         '--no-sandbox',
-        '--disable-gpu',
-        // 高强度反检测 (百度/阿里/腾讯等站点)
-        '--disable-features=AutomationControlled',          // 移除 navigator.webdriver（新版 Chrome）
-        '--disable-blink-features=AutomationControlled',     // 旧版 Chrome 兼容
-        '--disable-features=IsolateOrigins,site-per-process',
-        '--disable-site-isolation-trials',
-        '--disable-web-security',
-        '--disable-features=BlockInsecurePrivateNetworkRequests',
+        // 基础兼容性标志（Docker 必需）
         '--no-first-run',
         '--no-default-browser-check',
         '--disable-dev-shm-usage',
-        '--disable-extensions',
-        '--disable-component-update',
-        '--disable-background-networking',
-        '--disable-sync',
-        '--disable-default-apps',
-        '--disable-popup-blocking',
-        '--disable-prompt-on-repost',
-        '--disable-domain-reliability',
-        '--disable-breakpad',
-        '--disable-client-side-phishing-detection',
-        '--disable-hang-monitor',
-        '--disable-ipc-flooding-protection',
-        '--disable-renderer-backgrounding',
-        '--metrics-recording-only',
-        '--mute-audio',
-        '--no-pings',
-        '--password-store=basic',
-        '--use-mock-keychain',
+        // 反检测：仅保留对性能无影响的标志
+        '--disable-blink-features=AutomationControlled',
         `--user-agent=${target.device === 'mobile'
           ? 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
           : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}`,
